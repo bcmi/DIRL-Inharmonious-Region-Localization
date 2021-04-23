@@ -10,7 +10,7 @@ Here are some examples of inharmonious images (top row) and their inharmonious r
 </div>
 
 ### Ours Method
-We also demonstrate our proposed DIRL(**D**eep **I**nharmonious **R**egion **L**ocalization) network on the left part of following figure. The right part elaborates our proposed Bi-directional Feature Integration (BFI) block, Mask-guided Dual Attention (MDA) block, and Global-context Guided Decoder (GGD) block. 
+We also demonstrate our proposed **DIRL**(**D**eep **I**nharmonious **R**egion **L**ocalization) network on the left part of following figure. The right part elaborates our proposed Bi-directional Feature Integration (BFI) block, Mask-guided Dual Attention (MDA) block, and Global-context Guided Decoder (GGD) block. 
 <div  align="center"> 
 <img src="figures/network.png" width = "100%" height = "100%" alt="Some examples of inharmonious region" align=center />
 </div>
