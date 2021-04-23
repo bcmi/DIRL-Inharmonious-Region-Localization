@@ -1,0 +1,11 @@
+scipy==1.4.1
+torch==1.6.0
+scikit_image==0.17.2
+torchvision==0.6.0
+numpy==1.18.1
+albumentations==0.4.5
+opencv_python_headless==4.2.0.34
+Pillow==8.2.0
+scikit_learn==0.24.1
+skimage==0.0
+tensorboardX==2.2
