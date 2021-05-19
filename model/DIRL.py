@@ -199,21 +199,11 @@ class SpatialGate(nn.Module):
             BasicConv(in_dim, 1, kernel_size, stride=1, padding=(kernel_size-1) // 2,  relu=False)
         ])
         
-        if 'gb' in mask_mode.split('_')[-1]:
-            print("Using Gaussian Filter in mda!")
-            gaussian_kernel = np.float32(_get_kernel(31, 4))
-            gaussian_kernel = gaussian_kernel[np.newaxis, np.newaxis, ...]
-            self.gaussian_kernel = Parameter(torch.from_numpy(gaussian_kernel))
-
     def forward(self, x):
         x_compress = x
         x_out = self.spatial(x_compress)
         attention = F.sigmoid(x_out) # broadcasting
         x = x * attention
-        if 'gb' in self.mask_mode:
-            soft_attention = F.conv2d(attention, self.gaussian_kernel, padding=15)
-            soft_attention = min_max_norm(soft_attention)       # normalization
-            x = torch.mul(x, soft_attention.max(attention))     # x * max(soft, hard)
         return x, attention
         
 class MaskguidedDualAttention(nn.Module):
