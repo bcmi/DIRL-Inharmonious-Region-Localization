@@ -52,7 +52,7 @@ python3  dirl_train.py --dataset_root <PATH_TO_DATASET> --checkpoints_dir <PATH_
 
 [Google Drive](https://drive.google.com/file/d/1sdEIItb_e3iQD3hWASpm8yzaqjhYa1hG/view?usp=sharing) | [Baidu Cloud](https://pan.baidu.com/s/1t7N9trt1bbHeDGZF4IAreQ) (access code: hvto)
 
-Download the model and put it to directory ```<save_dir>```, where ```<save_dir>``` should be same as the bash parameter.
+Download the model and put it to directory ```<save_dir>```, where ```<save_dir>``` should be same as the bash parameter ```<checkpoints_dir>```.
 
 
 
