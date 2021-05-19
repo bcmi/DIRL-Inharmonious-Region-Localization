@@ -6,7 +6,6 @@ This is the official code of the following paper:
 
 > 
 > **Inharmonious Region Localization**
->
 > Jing Liang, Li Niu, Liqing Zhang
 > <br>MoE Key Lab of Artificial Intelligence, Shanghai Jiao Tong University<br>
 ([ICME 2021](https://arxiv.org/abs/2104.09453) | [Bibtex](#citation))
