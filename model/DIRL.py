@@ -233,13 +233,13 @@ class GGDBlock(nn.Module):
         super(GGDBlock, self).__init__()
         self.relu = nn.ReLU(True)
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-        self.conv_inup = Conv2dBlock(channel, channel, 3, 1, padding=1, norm='bn', activation='relu', use_bias=False)
-        self.conv_inbottom = Conv2dBlock(channel, channel, 3, 1, padding=1, norm='bn', activation='relu', use_bias=False)
-        self.conv_cat = Conv2dBlock(channel*2, channel, 3, 1, padding=1, norm='bn', activation='relu', use_bias=False)
+        self.conv_inup = Conv2dBlock(channel, channel, 3, 1, padding=1, norm='bn', activation='none', use_bias=False)
+        self.conv_inbottom = Conv2dBlock(channel, channel, 3, 1, padding=1, norm='bn', activation='none', use_bias=False)
+        self.conv_cat = Conv2dBlock(channel*2, channel, 3, 1, padding=1, norm='bn', activation='none', use_bias=False)
 
         self.outmost = is_outmost
         if self.outmost:
-            self.conv4 = Conv2dBlock(channel, channel, 3, 1, padding=1, norm='bn', activation='relu', use_bias=False)
+            self.conv4 = Conv2dBlock(channel, channel, 3, 1, padding=1, norm='bn', activation='none', use_bias=False)
             self.conv5 = nn.Conv2d(channel, 1, 1)
 
     def forward(self, x, up,bottom):
@@ -258,7 +258,7 @@ class GGDBlock(nn.Module):
         
         if self.outmost:
             x_out = self.upsample(x_out)
-            x = self.conv4(x_out)
+            # x_out = self.conv4(x_out) #x_out
             x = self.conv5(x_out)
             return {'xup':x, 'xbottom':x_out}
         else:

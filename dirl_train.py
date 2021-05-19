@@ -34,38 +34,38 @@ bce_loss = nn.BCELoss(size_average=True)
 ssim_loss = pytorch_ssim.SSIM(window_size=11,size_average=True)
 iou_loss = pytorch_iou.IOU(size_average=True)
 
-def bce_ssim_loss(pred,target, is_harmonious=False, use_iou=False):
+def bce_ssim_loss(pred,target, is_harmonious=False, loss_mode=''):
     bce_out = bce_loss(pred,target)
     if is_harmonious:
         ssim_out = 0
-        if use_iou:
+        if loss_mode == '':
             iou_out = 0
     else:
         ssim_out = 1 - ssim_loss(pred,target)
         iou_out = iou_loss(pred,target)
-    if use_iou:
+    if loss_mode == '':
         loss = bce_out + ssim_out + iou_out
         return {"total":loss, "bce":bce_out, "ssim":ssim_out, "iou":iou_out}
     else:
         loss = bce_out + ssim_out
         return {"total":loss, "bce":bce_out, "ssim":ssim_out}
     
-def multi_bce_loss_fusion(preds, labels_v, weights=1, is_harmonious=False, use_iou=False):
+def multi_bce_loss_fusion(preds, labels_v, weights=1, is_harmonious=False, loss_mode=''):
     total_loss = 0
     bce_out = 0
     ssim_out = 0
     if isinstance(weights, int):
         weights = [weights] * len(preds)
-    if use_iou:
+    if loss_mode == '':
         iou_out = 0
     for pred,w in zip(preds,weights):
-        loss = bce_ssim_loss(pred, labels_v, is_harmonious, use_iou)
+        loss = bce_ssim_loss(pred, labels_v, is_harmonious, loss_mode)
         total_loss += loss['total'] * w
         bce_out += loss['bce']
         ssim_out += loss['ssim']
-        if use_iou:
+        if loss_mode == '':
             iou_out += loss['iou']
-    if use_iou:
+    if loss_mode == '':
         return {"total":total_loss, "bce":bce_out, "ssim":ssim_out, "iou":iou_out}
     else:
         return {"total":total_loss, "bce":bce_out, "ssim":ssim_out}
@@ -143,7 +143,7 @@ class Trainer(object):
         self.data_std = opt.std.split(",")
         self.data_std = [float(m.strip()) for m in self.data_std]
         
-
+        opt.phase = 'train'
         inharm_dataset = IhdDataset(opt)
         if opt.is_train == 0:
             opt.batch_size = 1
@@ -164,7 +164,7 @@ class Trainer(object):
                 num_workers=int(opt.num_threads),
                 sampler=torch.utils.data.distributed.DistributedSampler(inharm_dataset)
             )
-        opt.is_train = False
+        opt.phase = 'val'
         opt.preprocess = 'resize'
         opt.no_flip = True
         self.val_dataloader = torch.utils.data.DataLoader(
@@ -388,21 +388,19 @@ class Trainer(object):
                 mask_gt = mask_gt.type(torch.FloatTensor).to(self.device)
                  
                 inharm_out = self.encoder(inharmonious)
-                # harm_out = self.encoder(harmonious)
                 inharmonious_pred = self.decoder(inharm_out)['mask']
-                # harmonious_pred = self.decoder(harm_out)['mask']
-
+            
                 self.encoder_opt.zero_grad()
                 self.decoder_opt.zero_grad()
                 
                 # if use mask supervision
                 if self.opt.mda_mode != 'vanilla':
-                    loss_inharmonious = multi_bce_loss_fusion([inharmonious_pred[0]], mask_gt, use_iou=self.opt.loss_mode == '')
-                    self.loss_attention = multi_bce_loss_fusion(inharmonious_pred[1:], mask_gt, use_iou=self.opt.loss_mode == '')['total']
+                    loss_inharmonious = multi_bce_loss_fusion([inharmonious_pred[0]], mask_gt, loss_mode=self.opt.loss_mode)
+                    self.loss_attention = multi_bce_loss_fusion(inharmonious_pred[1:], mask_gt, loss_mode=self.opt.loss_mode)['total']
                 else:
-                    loss_inharmonious = multi_bce_loss_fusion(inharmonious_pred, mask_gt,  use_iou=self.opt.loss_mode == '')
+                    loss_inharmonious = multi_bce_loss_fusion(inharmonious_pred, mask_gt,  loss_mode=self.opt.loss_mode)
             
-                self.loss_detection_ssim = loss_inharmonious['ssim']
+                # self.loss_detection_ssim = loss_inharmonious['ssim']
                 self.loss_detection_bce = loss_inharmonious['bce']
                 self.loss_detection =  loss_inharmonious['total']
                 
@@ -416,7 +414,7 @@ class Trainer(object):
                 self.loss_total.backward()
                 self.encoder_opt.step()
                 self.decoder_opt.step()
-                break
+               
                 # # print statistics
                 running_loss += self.loss_total.item()
                 F1Meter.update(FScore(inharmonious_pred[0], mask_gt), n=inharmonious_pred[0].size(0))

@@ -43,21 +43,21 @@ class IhdDataset(BaseDataset):
         BaseDataset.__init__(self, opt)
         self.image_paths = []
         self.opt = copy.copy(opt)
-        self.isTrain = opt.is_train
+        self.phase = opt.phase
         self.inharmonious_threshold = 1e-2#7.5e-3
         self.fg_upper_bound = 0.5
         
-        if opt.is_train==True:
+        if opt.phase=='train':
             # print('loading training file: ')
             self.trainfile = os.path.join(opt.dataset_root,'le50_train.txt')
             self.keep_background_prob = 0.05 # 0.05
             with open(self.trainfile,'r') as f:
                     for line in f.readlines():
                         self.image_paths.append(os.path.join(opt.dataset_root,line.rstrip()))
-        elif opt.is_train==False:
-            print('loading test file')
+        elif opt.phase == 'val' or opt.phase == 'test':
+            print('loading {} file'.format(opt.phase))
             self.keep_background_prob = -1
-            self.trainfile = os.path.join(opt.dataset_root,'le50_test.txt')
+            self.trainfile = os.path.join(opt.dataset_root,'le50_{}.txt'.format(opt.phase))
             with open(self.trainfile,'r') as f:
                     for line in f.readlines():
                         self.image_paths.append(os.path.join(opt.dataset_root,line.rstrip()))
@@ -118,7 +118,6 @@ class IhdDataset(BaseDataset):
     def check_augmented_sample(self, sample, aug_output):
         if self.keep_background_prob < 0.0 or random.random() < self.keep_background_prob:
             return True
-        # print(np.prod(aug_output['mask'].shape), aug_output['mask'].sum())
         # return aug_output['mask'].sum() > 1.0
         return aug_output['mask'].sum() > 10
 
@@ -139,10 +138,7 @@ class IhdDataset(BaseDataset):
         real = cv2.imread(target_path)
         real = cv2.cvtColor(real, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(mask_path)
-        
-
         mask = mask[:, :, 0].astype(np.float32) / 255.
-        # edge = edge[:, :, 0].astype(np.float32) / 255.
        
         return {'comp': comp, 'mask': mask, 'real': real,'img_path':path}
 

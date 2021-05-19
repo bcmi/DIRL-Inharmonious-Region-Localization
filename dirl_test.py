@@ -22,7 +22,22 @@ from data.ihd_dataset import IhdDataset
 from evaluation.metrics import MAE, FScore, compute_IoU, normPRED, compute_mAP
 from sklearn.metrics import average_precision_score	
 
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self):
+        self.reset()
 
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
 
 def tensor2np(x, isMask=False):
 	if isMask:
@@ -75,7 +90,7 @@ test_inharm_dataloader = DataLoader(test_inharm_dataset, batch_size=1,shuffle=Fa
 
 
 print("...load DIRLNet...")
-checkpoints_dir_root = '/media/sda/Harmonization/inharmonious/DIRLNet'
+checkpoints_dir_root = os.path.split(opt.checkpoints_dir)[0]
 model_names = [opt.checkpoints_dir.split('/')[-1]]
 prediction_dir = os.path.join(opt.checkpoints_dir, "rst")
 if not os.path.exists(prediction_dir): os.makedirs(prediction_dir)
@@ -83,9 +98,7 @@ trainers = {}
 
 for name in model_names:
 	ckpt_root = os.path.join(checkpoints_dir_root, name)
-	inject_pos = name.split("_")[-1]
 	opt.checkpoints_dir = ckpt_root
-	opt.inject_pos = inject_pos
 	opt.is_train = 0
 	trainer = Trainer(opt)
 	trainer.resume(opt.resume, preference=['encoder', 'decoder'])
@@ -97,12 +110,11 @@ device = trainers[model_names[0]].device
 # exit(0)
 # ------------ Evaluation Metrics -------------
 total_iters = 0
-total_map = {name:0 for name in model_names}
-total_f1 = {name:0 for name in model_names}
-total_fb = {name:0 for name in model_names}
-mIoU = {name:0 for name in model_names}
+mAP_meter = {name:AverageMeter() for name in model_names}
+f1_meter = {name:AverageMeter() for name in model_names}
+mIoU_meter = {name:AverageMeter() for name in model_names}
 
-save_flag = False
+save_flag = True
 trainer.encoder.eval()
 trainer.decoder.eval()
 # --------- 4. inference for each image ---------
@@ -128,26 +140,26 @@ for i_test, data in enumerate(test_inharm_dataloader):
 			pred = inharmonious_pred
 			label = mask_gt
 
-			mae = MAE(pred, label)
 			F1 = FScore(pred, label)
 			# FBeta = FScore(pred, label, beta2=0.3)
 			mAP = compute_mAP(pred, label)
 			IoU = compute_IoU(pred, label)
-			mIoU[name] += IoU
-			total_map[name] += mAP
-			total_f1[name] += F1
-		total_iters += 1
-		if total_iters % 100 == 0:
-			print("mAP:\t{}\tF1:\t{}\tmIoU:\t{}".format(total_map[name] / total_iters, total_f1[name] / total_iters, mIoU[name] / total_iters))
+			mIoU_meter[name].update(IoU, mask_gt.size(0))
+			mAP_meter[name].update(mAP, mask_gt.size(0))
+			f1_meter[name].update(F1, mask_gt.size(0))
+		
+
+			if total_iters % 100 == 0:
+				print("mAP:\t{}\tF1:\t{}\tmIoU:\t{}".format(mAP_meter[name].avg, f1_meter[name].avg, mIoU_meter[name].avg))
 
 		if save_flag:
-			save_output(inharmonious, mask_gt, rsts, prediction_dir, data['img_path'][0], extra_infos=extra_infos, verbose=False)
+			save_output(inharmonious, mask_gt, rsts, prediction_dir, data['img_path'][0], extra_infos=None, verbose=False)
 
-		
+
 for name in model_names:
 	print("Model:\t{}".format(name))
-	print("Average mAP:\t{}".format(total_map[name] / total_iters))
-	print("Average F1 Score:\t{}".format(total_f1[name] / total_iters))
-	print("Average IoU:\t{}".format(mIoU[name] / total_iters))		
+	print("Average mAP:\t{}".format(mAP_meter[name].avg))
+	print("Average F1 Score:\t{}".format(f1_meter[name].avg))
+	print("Average IoU:\t{}".format(mIoU_meter[name].avg))		
 		
 		
