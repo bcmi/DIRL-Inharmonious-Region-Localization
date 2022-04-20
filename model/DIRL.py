@@ -327,7 +327,7 @@ class InharmoniousDecoder(nn.Module):
         if opt.backbone == 'resnet34':
             self.dims = [512,512,256,128,64,64]
         elif opt.backbone == 'resnet50':
-            self.dims = [2048, 1024, 512, 256, 64,64]
+            self.dims = [512,2048, 1024, 512, 256, 64]
         self.n_layers = len(self.dims)-1
         
         ## ------------Transition Layer------
