@@ -9,6 +9,13 @@ This is the official code of the following paper:
 > Jing Liang, Li Niu, Liqing Zhang
 > <br>MoE Key Lab of Artificial Intelligence, Shanghai Jiao Tong University<br>
 ([ICME 2021](https://arxiv.org/abs/2104.09453) | [Bibtex](#citation))
+> 
+
+Our latest research on Inharmonious Region Localization was accepted by AAAI 2022: [[paper](https://ojs.aaai.org/index.php/AAAI/article/view/20048)|[code](https://github.com/bcmi/MadisNet-Inharmonious-Region-Localization)]
+> Inharmonious Region Localization by **Ma**gnifying **D**omain D**is**crepancy (**MadisNet**)
+> <br>Jing Liang<sup>1</sup>, Li Niu<sup>1</sup>, Penghao Wu<sup>1</sup>, Fengjun Guo<sup>2</sup>, Teng Long<sup>2</sup>
+> <br><sup>1</sup>MoE Key Lab of Artificial Intelligence, Shanghai Jiao Tong University
+> <br><sup>2</sup>INTSIG<br>
 
 ### Inharmonious Region
 Here are some examples of inharmonious images (top row) and their inharmonious region masks (bottom row). These inharmonious region could be infered by comparing the color or illuminance with surrounding area.
