@@ -41,7 +41,7 @@ We also demonstrate our proposed **DIRL**(**D**eep **I**nharmonious **R**egion *
 - Install dependencies: pip install -r requirements.txt
 
 ### Data Preparation
-In this paper, we conduct all of the experiments on the latest released harmonization dataset [iHarmoney4](https://github.com/bcmi/Image_Harmonization_Datasets). 
+In this paper, we conduct all of the experiments on the latest released harmonization dataset [iHarmony4](https://github.com/bcmi/Image_Harmonization_Datasets). 
 
 One concern is that the inharmonious region in an inharmonious image may be ambiguous because the background can also be treated as inharmonious region. To avoid the ambiguity, we only use the inharmonious images without using paired harmonious images, and simply discard the images with foreground occupying larger than 50\% area, which only account for about 2\% of the whole dataset.
 
@@ -59,7 +59,7 @@ python3  dirl_train.py --dataset_root <PATH_TO_DATASET> --checkpoints_dir <PATH_
 
 ### Pretrained Model
 
-[Google Drive](https://drive.google.com/file/d/1sdEIItb_e3iQD3hWASpm8yzaqjhYa1hG/view?usp=sharing) | [Baidu Cloud](https://pan.baidu.com/s/1t7N9trt1bbHeDGZF4IAreQ) (access code: hvto)
+[Dropbox](https://www.dropbox.com/scl/fi/hg9i1e3ih3zx85dav8utn/model.zip?rlkey=g8zz1p4ajgizmmtgbeyrletyy&st=4pzp0jsb&dl=0) | [Baidu Cloud](https://pan.baidu.com/s/1t7N9trt1bbHeDGZF4IAreQ) (access code: hvto)
 
 Download the model and put it to directory ```<save_dir>```, where ```<save_dir>``` should be same as the bash parameter ```<checkpoints_dir>```.
 
